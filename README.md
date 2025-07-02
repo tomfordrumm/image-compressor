@@ -1,29 +1,26 @@
-# image-compressor
+# Image Compressor
 
-This template should help get you started developing with Vue 3 in Vite.
+Simple Vue 3 application for compressing images in the browser. It uses [browser-image-compression](https://github.com/Donaldcwl/browser-image-compression) and works completely offline so it can be deployed to any static hosting.
 
-## Recommended IDE Setup
+## Usage
 
-[VSCode](https://code.visualstudio.com/) + [Volar](https://marketplace.visualstudio.com/items?itemName=Vue.volar) (and disable Vetur).
+1. Install dependencies
+    ```sh
+    npm install
+    ```
+2. Run for development
+    ```sh
+    npm run dev
+    ```
+3. Build for production
+    ```sh
+    npm run build
+    ```
 
-## Customize configuration
+## Features
+- Drag and drop or click to upload an image
+- Configure maximum file size and width/height
+- Preview before and after images
+- Display size information and percentage saved
+- Download the optimized image
 
-See [Vite Configuration Reference](https://vite.dev/config/).
-
-## Project Setup
-
-```sh
-npm install
-```
-
-### Compile and Hot-Reload for Development
-
-```sh
-npm run dev
-```
-
-### Compile and Minify for Production
-
-```sh
-npm run build
-```
