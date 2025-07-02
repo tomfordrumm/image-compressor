@@ -1,8 +1,8 @@
 <template>
-  <div class="container">
-    <h1>Image Compressor</h1>
+  <div class="container mx-auto max-w-2xl p-4 text-center">
+    <h1 class="text-2xl font-semibold mb-4">Image Compressor</h1>
     <div
-      class="drop-area"
+      class="drop-area border-2 border-dashed border-gray-400 p-6 rounded cursor-pointer bg-gray-50 hover:bg-gray-100 transition-colors"
       @click="triggerFileSelect"
       @dragover.prevent
       @drop.prevent="handleDrop"
@@ -14,39 +14,48 @@
         class="file-input"
         @change="handleFileChange"
       />
-      <p v-if="!originalUrl">Drag & Drop image or click to select</p>
-      <p v-else>{{ originalFile.name }}</p>
+      <p v-if="!originalUrl" class="text-gray-500">Drag & Drop image or click to select</p>
+      <p v-else class="text-gray-700">{{ originalFile.name }}</p>
     </div>
 
-    <div class="settings" v-if="originalFile">
-      <label>
-        Max Size (MB):
-        <input type="number" v-model.number="maxSizeMB" min="0" step="0.1" />
+    <div class="settings flex flex-wrap items-end gap-4 mt-4" v-if="originalFile">
+      <label class="flex items-center gap-2">
+        <span>Max Size:</span>
+        <input type="number" v-model.number="maxSize" min="0" step="0.1" class="border rounded px-2 py-1 w-24" />
+        <select v-model="sizeUnit" class="border rounded px-2 py-1">
+          <option value="KB">KB</option>
+          <option value="MB">MB</option>
+        </select>
       </label>
-      <label>
-        Max Width/Height:
-        <input type="number" v-model.number="maxWidthOrHeight" min="0" />
+      <label class="flex items-center gap-2" v-if="resize">
+        <span>Max Width/Height:</span>
+        <input type="number" v-model.number="maxWidthOrHeight" min="0" class="border rounded px-2 py-1 w-24" />
       </label>
-      <button @click="compressImage" :disabled="loading">Optimize</button>
+      <label class="flex items-center gap-2">
+        <input type="checkbox" v-model="resize" /> Resize
+      </label>
+      <button @click="compressImage" :disabled="loading" class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 transition-colors">
+        Optimize
+      </button>
     </div>
 
-    <div class="preview" v-if="compressedUrl">
+    <div class="preview flex justify-around mt-4" v-if="compressedUrl">
       <div>
-        <h3>Before</h3>
-        <img :src="originalUrl" alt="before" />
+        <h3 class="font-medium mb-2">Before</h3>
+        <img :src="originalUrl" alt="before" class="max-w-full max-h-72" />
       </div>
       <div>
-        <h3>After</h3>
-        <img :src="compressedUrl" alt="after" />
+        <h3 class="font-medium mb-2">After</h3>
+        <img :src="compressedUrl" alt="after" class="max-w-full max-h-72" />
       </div>
     </div>
 
-    <div class="info" v-if="compressedFile">
+    <div class="info mt-4" v-if="compressedFile">
       <p>Size before: {{ (originalSize/1024).toFixed(2) }} KB</p>
       <p>Size after: {{ (compressedSize/1024).toFixed(2) }} KB</p>
       <p>Saved: {{ savingPercent.toFixed(2) }}%</p>
-      <button @click="download" v-if="!loading">Download</button>
-      <div v-else class="spinner"></div>
+      <button @click="download" v-if="!loading" class="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600 transition-colors">Download</button>
+      <div v-else class="spinner w-6 h-6 border-4 border-gray-300 border-t-gray-700 rounded-full animate-spin mx-auto"></div>
     </div>
   </div>
 </template>
@@ -60,7 +69,9 @@ const originalFile = ref(null)
 const compressedFile = ref(null)
 const originalUrl = ref('')
 const compressedUrl = ref('')
-const maxSizeMB = ref(1)
+const maxSize = ref(1)
+const sizeUnit = ref('MB')
+const resize = ref(false)
 const maxWidthOrHeight = ref(800)
 const loading = ref(false)
 const originalSize = ref(0)
@@ -97,9 +108,11 @@ async function compressImage() {
   loading.value = true
   try {
     const options = {
-      maxSizeMB: maxSizeMB.value,
-      maxWidthOrHeight: maxWidthOrHeight.value,
+      maxSizeMB: sizeUnit.value === 'MB' ? maxSize.value : maxSize.value / 1024,
       useWebWorker: true,
+    }
+    if (resize.value) {
+      options.maxWidthOrHeight = maxWidthOrHeight.value
     }
     const result = await imageCompression(originalFile.value, options)
     compressedFile.value = result
@@ -126,49 +139,7 @@ const savingPercent = computed(() => {
 </script>
 
 <style scoped>
-.container {
-  text-align: center;
-  max-width: 800px;
-  margin: 0 auto;
-}
-.drop-area {
-  border: 2px dashed #ccc;
-  padding: 2rem;
-  margin-bottom: 1rem;
-  cursor: pointer;
-}
 .file-input {
   display: none;
-}
-.settings {
-  margin-bottom: 1rem;
-}
-.settings label {
-  margin-right: 1rem;
-}
-.preview {
-  display: flex;
-  justify-content: space-around;
-  margin-top: 1rem;
-}
-.preview img {
-  max-width: 100%;
-  max-height: 300px;
-}
-.info {
-  margin-top: 1rem;
-}
-.spinner {
-  border: 4px solid #f3f3f3;
-  border-top: 4px solid #555;
-  border-radius: 50%;
-  width: 24px;
-  height: 24px;
-  animation: spin 1s linear infinite;
-  margin: 0 auto;
-}
-@keyframes spin {
-  0% { transform: rotate(0deg); }
-  100% { transform: rotate(360deg); }
 }
 </style>
